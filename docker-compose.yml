@@ -1,0 +1,12 @@
+services:
+  video-processor:
+    build: .
+    volumes:
+      - ./input:/input
+      - ./output:/output
+    environment:
+      - FFMPEG_PATH=ffmpeg
+      - INPUT_DIR=/input
+      - OUTPUT_DIR=/output
+      # Pilihan model Whisper yang akan dipakai: tiny, base, small, medium, large
+      - MODEL_SIZE=small
