@@ -1,0 +1,36 @@
+# Gunakan image python slim sebagai base
+FROM python:3.10-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install sistem packages
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    git \
+    curl \
+    build-essential \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Upgrade pip dan install dependensi awal
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir ffmpeg-python
+
+# Konfigurasi git agar clone Whisper aman dan stabil
+ENV GIT_TERMINAL_PROMPT=0
+ENV GIT_HTTP_LOW_SPEED_LIMIT=1000
+ENV GIT_HTTP_LOW_SPEED_TIME=60
+
+# Install Whisper dari GitHub langsung (main branch)
+RUN git config --global http.postBuffer 524288000 && \
+    pip install --no-cache-dir git+https://github.com/openai/whisper.git@main
+
+# Copy file model spaCy Bahasa Indonesia ke dalam container
+COPY id_core_news_sm-0.0.4-py3-none-any.whl /tmp/
+
+# Install spaCy dan model Bahasa Indonesia dari file lokal
+RUN pip install --no-cache-dir spacy && \
+    pip install /tmp/id_core_news_sm-0.0.4-py3-none-any.whl && \
+    rm /tmp/id_core_news_sm-0.0.4-py3-none-any.whl && \
+    python -m spacy validate
